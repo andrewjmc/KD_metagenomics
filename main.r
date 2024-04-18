@@ -162,22 +162,22 @@ sample_indices <- lapply(sample_sheet_files, function(x){
 sample_lookup$P5_index <- as.character(reverseComplement(DNAStringSet(sample_indices$index2[match(sample_lookup$sample, sample_indices$Sample_Name)])))
 sample_lookup$P7_index <- sample_indices$index[match(sample_lookup$sample, sample_indices$Sample_Name)]
 
-metadata_febrile <- read.csv("metadata/clinical/metadata_febrile.csv", stringsAsFactors=FALSE)
-metadata_febrile$doo %<>% as.Date(format="%d/%m/%Y")
-metadata_febrile$pldate %<>% as.Date(format="%d/%m/%Y")
-metadata_febrile$lab_ill_day <- metadata_febrile$pldate - metadata_febrile$doo + 1
-metadata_febrile$lab_ill_day[which(metadata_febrile$lab_ill_day<0)] <- metadata_febrile$lab_ill_day[which(metadata_febrile$lab_ill_day<0)]+365
-metadata_febrile$lab_ill_day %<>% as.numeric()
-metadata_KD <- read.csv("metadata/clinical/metadata_KD_USA.csv", stringsAsFactors=FALSE)
+metadata_febrile <- read.csv("metadata/clinical/metadata_febrile_pub.csv", stringsAsFactors=FALSE)
+#metadata_febrile$doo %<>% as.Date(format="%d/%m/%Y")
+#metadata_febrile$pldate %<>% as.Date(format="%d/%m/%Y")
+#metadata_febrile$lab_ill_day <- metadata_febrile$pldate - metadata_febrile$doo + 1
+#metadata_febrile$lab_ill_day[which(metadata_febrile$lab_ill_day<0)] <- metadata_febrile$lab_ill_day[which(metadata_febrile$lab_ill_day<0)]+365
+#metadata_febrile$lab_ill_day %<>% as.numeric()
+metadata_KD <- read.csv("metadata/clinical/metadata_KD_USA_pub.csv", stringsAsFactors=FALSE)
 #Sample ID was mistranscribed and persists in filenames
-metadata_KD %<>% filter(ID!=153037) %>% mutate(ID=case_when(
-  ID==153035 ~ 153037,
-  .default=ID
-))
+#metadata_KD %<>% filter(ID!=153037) %>% mutate(ID=case_when(
+  #ID==153035 ~ 153037,
+  #.default=ID
+#))
 
-metadata_KD$doo %<>% as.Date(format="%d/%m/%Y")
-metadata_KD$ID %<>% stri_replace_all_fixed(".", "-")
-metadata_SMH_KD <- read.csv("metadata/clinical/metadata_KD_UK.csv", stringsAsFactors=FALSE)
+#metadata_KD$doo %<>% as.Date(format="%d/%m/%Y")
+#metadata_KD$ID %<>% stri_replace_all_fixed(".", "-")
+metadata_SMH_KD <- read.csv("metadata/clinical/metadata_KD_UK_pub.csv", stringsAsFactors=FALSE)
 for(echo in 1:5){
   tmp<-metadata_SMH_KD %>% select(contains(paste0("echo_", echo))) %>% apply(1,function(x){
     res<-names(x)[which(x==1)]
@@ -195,13 +195,13 @@ metadata_SMH_KD %<>% mutate(
     TRUE ~ FALSE
   )
 )
-metadata_SMH_KD$date_of_birth %<>% as.Date(format="%d/%m/%Y")
-metadata_SMH_KD$ip_date_present_loc_hosp %<>% as.Date(format="%d/%m/%Y")
-metadata_SMH_KD$ip_date_transf_ref_hosp %<>% as.Date(format="%d/%m/%Y")
-metadata_SMH_KD$ip_date_fever_onset %<>% as.Date(format="%d/%m/%Y")
-metadata_SMH_KD$date_adm <- if_else(is.na(metadata_SMH_KD$ip_date_present_loc_hosp), metadata_SMH_KD$ip_date_transf_ref_hosp, metadata_SMH_KD$ip_date_present_loc_hosp)
-metadata_SMH_KD$doo <- metadata_SMH_KD$ip_date_fever_onset
-metadata_SMH_KD$age <- as.numeric((metadata_SMH_KD$date_adm - metadata_SMH_KD$date_of_birth) / 365.25) %>% round(1)
+#metadata_SMH_KD$date_of_birth %<>% as.Date(format="%d/%m/%Y")
+#metadata_SMH_KD$ip_date_present_loc_hosp %<>% as.Date(format="%d/%m/%Y")
+#metadata_SMH_KD$ip_date_transf_ref_hosp %<>% as.Date(format="%d/%m/%Y")
+#metadata_SMH_KD$ip_date_fever_onset %<>% as.Date(format="%d/%m/%Y")
+#metadata_SMH_KD$date_adm <- if_else(is.na(metadata_SMH_KD$ip_date_present_loc_hosp), metadata_SMH_KD$ip_date_transf_ref_hosp, metadata_SMH_KD$ip_date_present_loc_hosp)
+#metadata_SMH_KD$doo <- metadata_SMH_KD$ip_date_fever_onset
+#metadata_SMH_KD$age <- as.numeric((metadata_SMH_KD$date_adm - metadata_SMH_KD$date_of_birth) / 365.25) %>% round(1)
 metadata_SMH_KD$gender <- ifelse(metadata_SMH_KD$gender=="male",1,2) #check correct coding!
 metadata_SMH_KD$group <- "KD"
 metadata_SMH_KD %<>% mutate(eth=case_when(
@@ -215,7 +215,7 @@ metadata_SMH_KD %<>% mutate(eth=case_when(
   final_ethnicity=="white_other" ~ 3,
   is.na(final_ethnicity) ~ NA_real_
 ))
-metadata_SMH_KD %<>% rename(ID=subject_id) %>% mutate(ID=as.character(ID))
+#metadata_SMH_KD %<>% rename(ID=subject_id) %>% mutate(ID=as.character(ID))
 metadata_febrile$pcrp %<>% as.numeric()
 metadata_febrile$pcrp <- metadata_febrile$pcrp * 10
 metadata_KD$pcrp %<>% as.numeric()
@@ -233,7 +233,7 @@ metadata_SMH_KD$grouped_syndrome <- "KD"
 metadata_SMH_KD$pcrp <- metadata_SMH_KD$ip_lab_1_crp
 metadata_SMH_KD$ppolys <- metadata_SMH_KD$ip_lab_1_neutro
 metadata_SMH_KD$pwbc <- metadata_SMH_KD$ip_lab_1_wcc
-metadata_SMH_KD$lab_ill_day <- as.numeric(as.Date(metadata_SMH_KD$ip_npa_ts_mbiol_date, format="%d/%m/%Y") - metadata_SMH_KD$doo + 1)
+#metadata_SMH_KD$lab_ill_day <- as.numeric(as.Date(metadata_SMH_KD$ip_npa_ts_mbiol_date, format="%d/%m/%Y") - metadata_SMH_KD$doo + 1)
 metadata_febrile$group <- "Febrile"
 metadata_febrile$eth %<>% as.numeric()
 metadata_KD$group <- "KD"
@@ -243,39 +243,37 @@ metadata_KD$gender %<>% as.numeric()
 metadata_febrile$gender %<>% as.numeric()
 metadata_febrile$ID %<>% as.character()
 metadata_KD$ID %<>% as.character()
+metadata_SMH_KD$ID %<>% as.character()
 metadata_KD$aneurysm <- as.numeric(metadata_KD$zworstever) >= 2.5
 metadata_febrile$aneurysm <- NA
-metadata <- bind_rows(select(metadata_febrile, ID, gender, age, eth, country, pcrp, ppolys, pwbc, grouped_syndrome, doo, lab_ill_day, aneurysm),
-                      select(metadata_KD,ID, gender, age, eth, country, pcrp, ppolys, pwbc, grouped_syndrome, doo, lab_ill_day, aneurysm),
-                      select(metadata_SMH_KD, ID, gender, age, eth, country, pcrp, ppolys, pwbc, grouped_syndrome, doo, lab_ill_day, aneurysm))
+#doo removed from select statements below in publication as calculations based on date of onset already made in shared data
+metadata <- bind_rows(select(metadata_febrile, ID, gender, age, eth, country, pcrp, ppolys, pwbc, grouped_syndrome, lab_ill_day, aneurysm),
+                      select(metadata_KD,ID, gender, age, eth, country, pcrp, ppolys, pwbc, grouped_syndrome, lab_ill_day, aneurysm),
+                      select(metadata_SMH_KD, ID, gender, age, eth, country, pcrp, ppolys, pwbc, grouped_syndrome, lab_ill_day, aneurysm))
+#metadata %<>% mutate(season=case_when(
+  #between(month(doo), 3,5) ~ "Spring",
+  #between(month(doo), 6,8) ~ "Summer",
+  #between(month(doo), 9,11) ~ "Autumn",
+  #!is.na(doo) ~ "Winter",
+  #TRUE ~ NA_character_
+#))
+#swab_dates <- read.csv("metadata/clinical/USA_swab_dates.csv", stringsAsFactor=FALSE) %>%
+  #mutate(swab_day=as.Date(swab_day, format="%d/%m/%Y"))
+
+#metadata %<>% mutate(swab_date=swab_dates$swab_day[match(ID, as.character(floor(swab_dates$ID)))],
+                          #swab_date=case_when(
+                            #is.na(swab_date) ~ doo + lab_ill_day,
+                            #.default=swab_date
+                          #),
+                          #swab_ill_day=as.numeric(swab_date-doo+1)) %>%
 
 numeric_ID <- stri_extract_first_regex(sample_lookup$sample, "[0-9]{4}[0-9]*([-][0-9]+)?")
 sample_lookup %<>% cbind(metadata[match(numeric_ID, metadata$ID), -1])
-
-sample_lookup %<>% mutate(season=case_when(
-  between(month(doo), 3,5) ~ "Spring",
-  between(month(doo), 6,8) ~ "Summer",
-  between(month(doo), 9,11) ~ "Autumn",
-  !is.na(doo) ~ "Winter",
-  TRUE ~ NA_character_
-))
 
 antibiotic <- read.csv("metadata/clinical/USA_antibiotics.csv", stringsAsFactors=FALSE)
 colnames(antibiotic) <- c("ID", "Index", "Group", "Antibiotic", "Amoxicillin", "Coamoxiclav", "Azithromycin", "Cefazolin", "Cephalexin", "Clindamycin", "Ceftriaxone", "Other_antibiotic", "Other_antibiotic_name", "X")
 numeric_ID <- as.numeric(stri_extract_first_regex(sample_lookup$sample, "[0-9]{4}[0-9]*"))
 sample_lookup %<>% cbind(antibiotic[match(numeric_ID, antibiotic$Index), c("Antibiotic"), drop=FALSE])
-
-swab_dates <- read.csv("metadata/clinical/USA_swab_dates.csv", stringsAsFactor=FALSE) %>%
-  mutate(swab_day=as.Date(swab_day, format="%d/%m/%Y"))
-
-sample_lookup %<>% mutate(ID=stri_extract_first_regex(sample, "(?<=[-])[0-9]+"),
-                          swab_date=swab_dates$swab_day[match(ID, as.character(floor(swab_dates$ID)))],
-                          swab_date=case_when(
-                            is.na(swab_date) ~ doo + lab_ill_day,
-                            .default=swab_date
-                          ),
-                          swab_ill_day=as.numeric(swab_date-doo+1)) %>%
-  select(-ID)
 
 #Quality
 quality<-read.table("metadata/nonclinical/fastq_quality.tsv", sep="\t", header=FALSE, stringsAsFactors=FALSE)
@@ -919,7 +917,7 @@ permanova_m$SumOfSqs[1:4]/permanova_m$SumOfSqs[length(permanova_m$SumOfSqs)]
 #Export
 m_metadata <- sample_lookup %>%
   filter(group != "Negative control" &! sample %in% exclude_qual) %>%
-  select(sample, age, group, gender, country, eth, season, human_prop, concentration, effective_bacteria_conc, effective_human_conc, batch, doo, plate, row, col, pool, lab_ill_day, bacteria_prop, bacteria_reads_nocontam, total_reads, Antibiotic, pcrp, pwbc, ppolys) %>%
+  select(sample, age, group, gender, country, eth, season, human_prop, concentration, effective_bacteria_conc, effective_human_conc, batch, plate, row, col, pool, lab_ill_day, bacteria_prop, bacteria_reads_nocontam, total_reads, Antibiotic, pcrp, pwbc, ppolys) %>%
   rename(ID=sample)
 
 m_data <- bacteria_matrix %>% as.data.frame()
